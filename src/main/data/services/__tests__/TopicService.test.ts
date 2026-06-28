@@ -2,7 +2,8 @@
 import '@data/services/MessageService'
 
 import { assistantTable } from '@data/db/schemas/assistant'
-import { fileEntryTable, fileRefTable } from '@data/db/schemas/file'
+import { fileEntryTable } from '@data/db/schemas/file'
+import { chatMessageFileRefTable } from '@data/db/schemas/fileRelations'
 import { groupTable } from '@data/db/schemas/group'
 import { messageTable } from '@data/db/schemas/message'
 import { pinTable } from '@data/db/schemas/pin'
@@ -11,7 +12,7 @@ import { topicTable } from '@data/db/schemas/topic'
 import { TopicService, topicService } from '@data/services/TopicService'
 import { DataApiError, ErrorCode } from '@shared/data/api'
 import { DEFAULT_ASSISTANT_SETTINGS } from '@shared/data/types/assistant'
-import { chatMessageSourceType, type FileEntryId } from '@shared/data/types/file'
+import type { FileEntryId } from '@shared/data/types/file'
 import { setupTestDatabase, withRoot } from '@test-helpers/db'
 import { and, asc, eq, isNotNull, isNull } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
@@ -752,7 +753,6 @@ describe('TopicService', () => {
   describe('duplicate', () => {
     it('copies the root-to-node path into a new topic and prunes siblings and descendants', async () => {
       const fileEntryId = '019606a0-0000-7000-8000-00000000fb01' as FileEntryId
-      const previewEntryId = '019606a0-0000-7000-8000-00000000fb02' as FileEntryId
       await dbh.db.insert(topicTable).values({
         id: 'src-t',
         name: 'Source',
@@ -761,30 +761,17 @@ describe('TopicService', () => {
         createdAt: 1,
         updatedAt: 1
       })
-      await dbh.db.insert(fileEntryTable).values([
-        {
-          id: fileEntryId,
-          origin: 'internal',
-          name: 'duplicate-attachment',
-          ext: 'txt',
-          size: 1,
-          externalPath: null,
-          deletedAt: null,
-          createdAt: 1,
-          updatedAt: 1
-        },
-        {
-          id: previewEntryId,
-          origin: 'internal',
-          name: 'duplicate-preview',
-          ext: 'png',
-          size: 1,
-          externalPath: null,
-          deletedAt: null,
-          createdAt: 1,
-          updatedAt: 1
-        }
-      ])
+      await dbh.db.insert(fileEntryTable).values({
+        id: fileEntryId,
+        origin: 'internal',
+        name: 'duplicate-attachment',
+        ext: 'txt',
+        size: 1,
+        externalPath: null,
+        deletedAt: null,
+        createdAt: 1,
+        updatedAt: 1
+      })
       await dbh.db.insert(messageTable).values(
         withRoot('src-t', [
           {
@@ -844,22 +831,12 @@ describe('TopicService', () => {
           }
         ])
       )
-      await dbh.db.insert(fileRefTable).values([
+      await dbh.db.insert(chatMessageFileRefTable).values([
         {
           id: '11111111-1111-4111-8111-123456789abc',
           fileEntryId,
-          sourceType: chatMessageSourceType,
           sourceId: 'selected',
           role: 'attachment',
-          createdAt: 2,
-          updatedAt: 2
-        },
-        {
-          id: '11111111-1111-4111-8111-123456789abd',
-          fileEntryId: previewEntryId,
-          sourceType: chatMessageSourceType,
-          sourceId: 'selected',
-          role: 'preview',
           createdAt: 2,
           updatedAt: 2
         }
@@ -898,33 +875,19 @@ describe('TopicService', () => {
         providerMetadata: { cherry: { fileEntryId } }
       })
 
-      const refs = await dbh.db.select().from(fileRefTable).where(eq(fileRefTable.sourceType, chatMessageSourceType))
-      expect(refs).toHaveLength(4)
+      const refs = await dbh.db.select().from(chatMessageFileRefTable)
+      expect(refs).toHaveLength(2)
       expect(refs).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             fileEntryId,
-            sourceType: chatMessageSourceType,
             sourceId: 'selected',
             role: 'attachment'
           }),
           expect.objectContaining({
             fileEntryId,
-            sourceType: chatMessageSourceType,
             sourceId: copiedLeaf?.id,
             role: 'attachment'
-          }),
-          expect.objectContaining({
-            fileEntryId: previewEntryId,
-            sourceType: chatMessageSourceType,
-            sourceId: 'selected',
-            role: 'preview'
-          }),
-          expect.objectContaining({
-            fileEntryId: previewEntryId,
-            sourceType: chatMessageSourceType,
-            sourceId: copiedLeaf?.id,
-            role: 'preview'
           })
         ])
       )
