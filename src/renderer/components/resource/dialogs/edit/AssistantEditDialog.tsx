@@ -64,7 +64,7 @@ type AssistantEditFormValues = {
   name: string
   description: string
   modelId: UniqueModelId | null
-  tags: string[]
+  tagName: string | null
   prompt: string
   temperature: number
   enableTemperature: boolean
@@ -112,7 +112,7 @@ function defaultValuesForAssistant(resource: AssistantEditDialogResource): Assis
     name: form.name,
     description: form.description,
     modelId: form.modelId ?? null,
-    tags: form.tags,
+    tagName: form.tagName,
     prompt: form.prompt,
     temperature: form.temperature,
     enableTemperature: form.enableTemperature,
@@ -145,7 +145,7 @@ function buildAssistantFormState(baseline: AssistantFormState, values: Assistant
     name: values.name,
     description: values.description,
     modelId: values.modelId,
-    tags: values.tags,
+    tagName: values.tagName,
     prompt: values.prompt,
     temperature: values.temperature,
     enableTemperature: values.enableTemperature,
@@ -372,7 +372,7 @@ function AssistantBasicFields({
         </div>
         <FormField
           control={form.control}
-          name="tags"
+          name="tagName"
           render={({ field }) => (
             <FormItem className="min-w-0">
               <FormLabel>{t('library.config.basic.tags')}</FormLabel>

@@ -501,7 +501,6 @@ describe('LibraryPage create flow', () => {
       name: 'Assistant to duplicate',
       description: '',
       avatar: '💬',
-      tags: [],
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
       raw: { id: 'assistant-to-duplicate', name: 'Assistant to duplicate', tags: [] }
@@ -615,7 +614,6 @@ describe('LibraryPage create flow', () => {
       name: 'Selector Agent',
       description: '',
       avatar: '',
-      tags: [],
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
       raw: { id: 'agent-from-selector' }
@@ -637,7 +635,6 @@ describe('LibraryPage create flow', () => {
       name: 'Selector Agent',
       description: '',
       avatar: '',
-      tags: [],
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
       raw: { id: 'agent-from-selector' }
@@ -660,7 +657,6 @@ describe('LibraryPage create flow', () => {
       name: 'Selector Assistant',
       description: '',
       avatar: '💬',
-      tags: [],
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
       raw: { id: 'assistant-from-selector' }
@@ -682,7 +678,6 @@ describe('LibraryPage create flow', () => {
       name: 'Stale Assistant',
       description: '',
       avatar: '💬',
-      tags: [],
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
       raw: { id: 'assistant-stale-tags', name: 'Stale Assistant' }
@@ -702,7 +697,6 @@ describe('LibraryPage create flow', () => {
       name: 'Grid Prompt',
       description: '',
       avatar: 'Aa',
-      tags: [],
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
       raw: { id: 'prompt-from-grid' }
@@ -731,7 +725,6 @@ describe('LibraryPage create flow', () => {
       name: 'Grid Skill',
       description: '',
       avatar: 'S',
-      tags: [],
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
       raw: { id: 'skill-from-grid', name: 'Grid Skill' }
