@@ -23,10 +23,19 @@ const shellActionMocks = vi.hoisted(() => ({
   close: vi.fn()
 }))
 
+const preferenceMocks = vi.hoisted(() => ({
+  sortType: 'list' as 'list' | 'tags',
+  setSortType: vi.fn()
+}))
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string) => key
   })
+}))
+
+vi.mock('@data/hooks/usePreference', () => ({
+  usePreference: () => [preferenceMocks.sortType, preferenceMocks.setSortType]
 }))
 
 vi.mock('@logger', () => ({
@@ -226,6 +235,8 @@ vi.mock('@renderer/utils/error', () => ({
 describe('old layout entity resource list actions', () => {
   beforeEach(() => {
     shellActionMocks.close.mockClear()
+    preferenceMocks.sortType = 'list'
+    preferenceMocks.setSortType.mockClear()
     assistantDataMocks.deleteAssistant.mockResolvedValue(undefined)
     assistantDataMocks.deleteTopicsByAssistantId.mockResolvedValue({ deletedCount: 1, deletedIds: ['topic-1'] })
     assistantDataMocks.refreshTopics.mockResolvedValue(undefined)
@@ -272,6 +283,33 @@ describe('old layout entity resource list actions', () => {
     )
     expect(onStartDraftAssistant).toHaveBeenCalledWith(null)
     expect(shellActionMocks.close).not.toHaveBeenCalled()
+  })
+
+  it('toggles assistant tag grouping from the context menu (list → tags)', () => {
+    render(
+      <AssistantResourceList activeAssistantId="assistant-1" onSelectTopic={vi.fn()} onStartDraftAssistant={vi.fn()} />
+    )
+
+    // sort_type === 'list' → the menu offers "group by tag".
+    const menu = screen.getByTestId('assistant-1-context-menu')
+    expect(menu).toHaveTextContent('assistants.tags.group_by')
+    expect(menu).not.toHaveTextContent('assistants.tags.ungroup')
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'assistants.tags.group_by' })[0])
+    expect(preferenceMocks.setSortType).toHaveBeenCalledWith('tags')
+  })
+
+  it('offers turning tag grouping off when already grouping (tags → list)', () => {
+    preferenceMocks.sortType = 'tags'
+
+    render(
+      <AssistantResourceList activeAssistantId="assistant-1" onSelectTopic={vi.fn()} onStartDraftAssistant={vi.fn()} />
+    )
+
+    expect(screen.getByTestId('assistant-1-context-menu')).toHaveTextContent('assistants.tags.ungroup')
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'assistants.tags.ungroup' })[0])
+    expect(preferenceMocks.setSortType).toHaveBeenCalledWith('list')
   })
 
   it('uses delete-agent actions for the old layout agent context and more menus', async () => {
